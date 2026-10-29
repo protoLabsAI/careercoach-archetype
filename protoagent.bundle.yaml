@@ -1,0 +1,60 @@
+# A protoAgent plugin BUNDLE (ADR 0040) — the Career Coach archetype: a job-hunt
+# copilot for any operator. The picker id comes from protoAgent's catalog row
+# `career-coach`; the persona ships as its `career-coach` soul preset.
+#
+# Install (onto any host): python -m server plugin install <this-repo-url>
+# — or create a fleet member from it (README "Create an agent").
+#
+# NEVER AUTO-SUBMITS. It prepares an apply kit; the operator files the form.
+# Browser fill is an opt-in beta, default off, and still never submits.
+#
+# CORE FLOOR — protoAgent >= 0.34.0 (bundles carry no min-version, so stated here):
+#   * careercoach declares `min_protoagent_version: 0.34.0`; the loader refuses
+#     it on older cores.
+#   * The `career-coach` preset ships with the protoAgent PR adding the catalog
+#     row. Older cores without it fall back to the base persona; pass the persona
+#     inline as `soul` instead (README).
+#
+# MODEL — deliberately unset: the agent uses the host's model connection.
+#
+# PIN LIFECYCLE (ADR 0049): external members are pinned to release TAGS; on core
+# >= 0.146 a pin is a FLOOR (newest COMPATIBLE tag, caret semantics; for 0.x the
+# minor is the boundary). Bump only to adopt an out-of-range release. The verify
+# workflow proves each pin set. Keep member entries on ONE line:
+# scripts/check_bundle_updates.py rewrites `ref:` in place.
+
+id: careercoach-archetype
+name: Career Coach
+# Bundle release version; protoAgent's bundle loader ignores it.
+version: 0.1.0
+description: >-
+  A job-hunt copilot — paste your resume, get a profile and fresh roles in minutes;
+  triage an inbox, track a pipeline, and get an apply kit (tailored resume, cover
+  letter, every answer) you fill in yourself. Never applies on its own.
+
+# The core version targeted by this pin set (ADR 0049): metadata, not enforced.
+# The verify workflow checks a fresh core checkout. See CORE FLOOR above.
+verified_against: 0.220.0
+
+plugins:
+  - { id: careercoach, url: https://github.com/protoLabsAI/careercoach-plugin, ref: v0.13.0 }  # first-run onboarding (S5a)
+  - { id: artifact, builtin: true }   # renders CVs / cover letters
+  - { id: notes,    builtin: true }   # ideas and loose ends between sessions
+
+enabled: [careercoach, artifact, notes]   # careercoach is disabled by author default
+
+# No `config:` defaults on purpose. The member defaults are right for a fresh agent:
+#   * jobs_provider: auto uses keyless Himalayas without an API key.
+#   * Browser fill stays off; the operator files the prepared apply kit.
+#   * Targets and location are confirmed in onboarding, so no config_inputs needed.
+
+# Agent archetype (ADR 0100): presents this bundle as "Career Coach" once installed.
+# `soul_preset` gives a DIRECT `plugin install <url>` the persona on a host that
+# ships the preset. The catalog row, not this block, supplies picker id career-coach.
+archetype:
+  label: Career Coach
+  icon: Compass
+  soul_preset: career-coach
+  blurb: A job-hunt copilot — paste your resume, get a profile and fresh roles in minutes; triage an inbox, track a pipeline, and get an apply kit (tailored resume, cover letter, every answer) you fill in yourself. Never applies on its own.
+  # Capability contract (ADR 0100): verify_bundle.py fails unless both tools bind.
+  requires_tools: [careercoach_find_roles, careercoach_save_apply_kit]
