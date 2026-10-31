@@ -37,12 +37,13 @@ The persona is protoAgent's `career-coach` soul preset:
 
 | plugin | source | role |
 |---|---|---|
-| `careercoach` | [careercoach-plugin](https://github.com/protoLabsAI/careercoach-plugin), floor `v0.13.0` | First-run onboarding, profile, role discovery, inbox, pipeline, apply kits, interview prep, and the **Career Coach** view |
+| `careercoach` | [careercoach-plugin](https://github.com/protoLabsAI/careercoach-plugin), floor `v0.13.4` | First-run onboarding, profile, role discovery, inbox, pipeline, apply kits, interview prep, and the **Career Coach** view |
 | `artifact` | builtin | Renders CVs and cover letters |
 | `notes` | builtin | Ideas and loose ends between sessions |
+| `agent_browser` | builtin | `browser_open` and `browser_pdf` turn the tailored resume into the kit's PDF. Browser fill stays off, and the submit gate blocks any submit click |
 
-The bundle explicitly enables all three members: `careercoach` is disabled by author
-default. The persona lives in core as the `career-coach` preset; the picker catalog row
+The bundle explicitly enables all four members: `careercoach` and `agent_browser` are
+disabled by author default. The persona lives in core as the `career-coach` preset; the picker catalog row
 also lives in core and supplies the id `career-coach`.
 
 No configuration overrides or setup inputs are needed. The plugin defaults to
@@ -53,7 +54,7 @@ Browser fill stays off, and the agent inherits the host's model connection.
 
 **Core floor: protoAgent ≥ 0.34.0.** Career Coach declares
 `min_protoagent_version: 0.34.0`; the loader refuses it on older cores. The bundle
-targets `0.220.0` for verification. Bundles cannot enforce a core floor themselves.
+targets `0.224.0` for verification. Bundles cannot enforce a core floor themselves.
 
 The `career-coach` soul preset ships with the protoAgent PR adding the catalog row.
 On older cores without that preset, `soul_preset` falls back to the base persona.
@@ -80,7 +81,7 @@ jq -n --rawfile soul career-coach.md '{
   name: "career-coach",
   bundle: "https://github.com/protoLabsAI/careercoach-archetype",
   soul: $soul,
-  requires_tools: ["careercoach_find_roles", "careercoach_save_apply_kit"]
+  requires_tools: ["careercoach_find_roles", "careercoach_save_apply_kit", "browser_pdf"]
 }' | curl -s -X POST http://127.0.0.1:7870/api/fleet \
       -H 'content-type: application/json' \
       ${PROTOAGENT_TOKEN:+-H "authorization: Bearer $PROTOAGENT_TOKEN"} \
@@ -99,7 +100,7 @@ Run from a protoAgent environment:
 python -m server plugin install https://github.com/protoLabsAI/careercoach-archetype
 ```
 
-Then enable `careercoach, artifact, notes`. Direct install uses `soul_preset` on hosts
+Then enable `careercoach, artifact, notes, agent_browser`. Direct install uses `soul_preset` on hosts
 that ship it; otherwise supply the persona explicitly.
 
 ## First run
@@ -115,7 +116,8 @@ that ship it; otherwise supply the persona explicitly.
 5. Pick a role and request an apply kit. Review the tailored resume, cover letter,
    and answers, then fill and submit the application yourself.
 
-`v0.13.0` is the first release with this first-run onboarding flow (S5a).
+`v0.13.4` is the first release with first-run onboarding (S5a), a per-agent workspace,
+kit validation and the grounding check all in place.
 
 ## Optional JSearch API key
 
@@ -129,13 +131,14 @@ out of the bundle manifest. Targets and location constraints remain yours to con
 
 External members pin release tags. On core ≥ 0.146, each pin is a **floor**: installs
 take the newest compatible release (caret semantics; for 0.x, the minor is the
-boundary). The `v0.13.0` floor admits compatible `0.13.x` releases.
+boundary). The `v0.13.4` floor admits compatible `0.13.x` releases.
 
 The shared scripts and workflow are copied verbatim from
 [brand-launch-archetype](https://github.com/protoLabsAI/brand-launch-archetype/tree/27b0775c34859203718ba221c43a32236968a62d).
 On every PR and weekly, `verify-bundle.yml` installs the bundle into a scratch agent
 on a fresh protoAgent checkout, loads its members, probes declared views for HTTP
-200, and verifies that `careercoach_find_roles` and `careercoach_save_apply_kit` bind.
+200, and verifies that `careercoach_find_roles`, `careercoach_save_apply_kit` and
+`browser_pdf` bind.
 The update checker proposes a pin bump only for an out-of-range release.
 
 ### Pin-bump PR lifecycle
