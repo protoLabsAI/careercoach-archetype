@@ -57,5 +57,5 @@ archetype:
   icon: Compass
   soul_preset: career-coach
   blurb: A job-hunt copilot — paste your resume, get a profile and fresh roles in minutes; triage an inbox, track a pipeline, and get an apply kit (tailored resume, cover letter, every answer) you fill in yourself. Never applies on its own.
-  # Capability contract (ADR 0100): verify_bundle.py fails unless both tools bind.
+  # Capability contract (ADR 0100): verify_bundle.py fails unless all of these tools bind.
   requires_tools: [careercoach_find_roles, careercoach_save_apply_kit, browser_pdf]
