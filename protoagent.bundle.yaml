@@ -37,7 +37,7 @@ description: >-
 verified_against: 0.224.0
 
 plugins:
-  - { id: careercoach, url: https://github.com/protoLabsAI/careercoach-plugin, ref: v0.13.4 }  # first-run onboarding (S5a), per-agent workspace, kit checks
+  - { id: careercoach, url: https://github.com/protoLabsAI/careercoach-plugin, ref: v0.14.0 }  # first-run onboarding (S5a), per-agent workspace, kit checks
   - { id: artifact, builtin: true }   # renders CVs / cover letters
   - { id: notes,    builtin: true }   # ideas and loose ends between sessions
   - { id: agent_browser, builtin: true }  # browser_open + browser_pdf turn the resume into the kit's PDF
