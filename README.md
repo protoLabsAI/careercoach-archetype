@@ -5,8 +5,11 @@ a job-hunt copilot. Paste your resume, get a profile and fresh roles in minutes,
 triage an inbox, track your pipeline, and prepare for applications and interviews.
 
 **It never submits an application.** It prepares an apply kit — a tailored resume,
-cover letter, and every answer — and the operator files the form. Browser fill is an
-opt-in beta, default off, and still never submits. You review the kit and submit yourself.
+cover letter, and every answer — and the operator files the form. New agents from this
+bundle turn browser fill on for Greenhouse and Ashby by default; the submit gate still
+requires your explicit approval for every submit, so nothing is sent on its own. You
+review the kit and submit yourself. You can change or blank the `browser_fill` setting
+in Settings, and this bundle update does not change existing agents.
 
 ## What it does
 
@@ -27,8 +30,9 @@ The persona is protoAgent's `career-coach` soul preset:
    never an invitation to invent an achievement.
 2. **Your operator profile is the single source of truth.** Drafts and answers draw
    from confirmed experience, preferences, and constraints.
-3. **Never auto-submits.** You review the apply kit and file the application yourself,
-   including when you opt into browser fill.
+3. **Never auto-submits.** You review the apply kit and file the application yourself.
+   Browser fill is on for Greenhouse and Ashby, but the submit gate still blocks every
+   submit until you approve it.
 4. **Honest fit scoring.** It explains gaps and tradeoffs instead of treating every
    posting as a strong match.
 5. **Verifies company facts.** Research needs sources; uncertain claims stay uncertain.
@@ -40,15 +44,19 @@ The persona is protoAgent's `career-coach` soul preset:
 | `careercoach` | [careercoach-plugin](https://github.com/protoLabsAI/careercoach-plugin), floor `v0.13.4` | First-run onboarding, profile, role discovery, inbox, pipeline, apply kits, interview prep, and the **Career Coach** view |
 | `artifact` | builtin | Renders CVs and cover letters |
 | `notes` | builtin | Ideas and loose ends between sessions |
-| `agent_browser` | builtin | `browser_open` and `browser_pdf` turn the tailored resume into the kit's PDF. Browser fill stays off, and the submit gate blocks any submit click |
+| `agent_browser` | builtin | `browser_open` and `browser_pdf` turn the tailored resume into the kit's PDF. The bundle turns browser fill on for Greenhouse and Ashby, and the submit gate still blocks any submit click until you approve it |
 
 The bundle explicitly enables all four members: `careercoach` and `agent_browser` are
 disabled by author default. The persona lives in core as the `career-coach` preset; the picker catalog row
 also lives in core and supplies the id `career-coach`.
 
-No configuration overrides or setup inputs are needed. The plugin defaults to
-`jobs_provider: auto`, which uses keyless Himalayas when no API key is configured.
-Browser fill stays off, and the agent inherits the host's model connection.
+No setup inputs are needed. The plugin defaults to `jobs_provider: auto`, which uses
+keyless Himalayas when no API key is configured. The bundle seeds one config override:
+`careercoach.browser_fill: "greenhouse,ashby"`, so new agents turn browser fill on for
+Greenhouse and Ashby (Lever and Workable stay off). The submit gate still requires your
+explicit approval for every submit. Change or blank the `browser_fill` setting under
+**Settings ▸ Plugins ▸ Career Coach** to adjust which ATS fills; existing agents are
+not changed by this bundle update. The agent inherits the host's model connection.
 
 ## Create an agent
 
@@ -81,7 +89,7 @@ jq -n --rawfile soul career-coach.md '{
   name: "career-coach",
   bundle: "https://github.com/protoLabsAI/careercoach-archetype",
   soul: $soul,
-  requires_tools: ["careercoach_find_roles", "careercoach_save_apply_kit", "browser_pdf"]
+  requires_tools: ["careercoach_find_roles", "careercoach_save_apply_kit", "browser_pdf", "careercoach_plan_fill"]
 }' | curl -s -X POST http://127.0.0.1:7870/api/fleet \
       -H 'content-type: application/json' \
       ${PROTOAGENT_TOKEN:+-H "authorization: Bearer $PROTOAGENT_TOKEN"} \
@@ -137,8 +145,9 @@ The shared scripts and workflow are copied verbatim from
 [brand-launch-archetype](https://github.com/protoLabsAI/brand-launch-archetype/tree/27b0775c34859203718ba221c43a32236968a62d).
 On every PR and weekly, `verify-bundle.yml` installs the bundle into a scratch agent
 on a fresh protoAgent checkout, loads its members, probes declared views for HTTP
-200, and verifies that `careercoach_find_roles`, `careercoach_save_apply_kit` and
-`browser_pdf` bind.
+200, and verifies that `careercoach_find_roles`, `careercoach_save_apply_kit`,
+`browser_pdf` and `careercoach_plan_fill` bind — the last one proving the seeded
+`browser_fill: "greenhouse,ashby"` default registers the browser-fill tools.
 The update checker proposes a pin bump only for an out-of-range release.
 
 ### Pin-bump PR lifecycle

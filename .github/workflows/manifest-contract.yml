@@ -1,0 +1,20 @@
+# Fast contract lint for the bundle manifest + README (tests/test_bundle_manifest.py).
+# Runs without a protoAgent checkout, so it stays green in seconds on every PR; the
+# full install+load+probe proof still lives in verify-bundle.yml. Kept separate so
+# verify-bundle.yml stays copied verbatim from brand-launch-archetype.
+name: manifest-contract
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: python -m unittest discover -s tests -v
